@@ -1,4 +1,4 @@
-import { SubscriptionPlan } from 'types';
+import type { SubscriptionPlan } from 'types';
 import { env } from '@/env.mjs';
 
 export const freePlan: SubscriptionPlan = {
@@ -9,7 +9,7 @@ export const freePlan: SubscriptionPlan = {
 };
 
 export const proPlan: SubscriptionPlan = {
-  name: 'PRO',
-  description: 'The PRO plan has unlimited posts.',
-  stripe_price_id: env.STRIPE_PRO_MONTHLY_PLAN_ID || ''
+  name: 'Evently Subscription',
+  description: 'Access personalized event recommendations for $8 per month on evently.life',
+  stripe_price_id: env.STRIPE_EVENTLY_MONTHLY_PLAN_ID || ''
 };
