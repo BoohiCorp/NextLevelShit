@@ -1,176 +1,216 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { Card, CardContent } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { signUp } from '@/utils/auth-helpers/server';
-import { handleRequest } from '@/utils/auth-helpers/client';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import Link from "next/link";
+import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { signUp } from "@/utils/auth-helpers/server";
+import { handleRequest, signInWithOAuth } from "@/utils/auth-helpers/client";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import type { Provider } from "@supabase/supabase-js";
+import Particles from "@/components/magicui/particles";
+import { useTheme } from "next-themes";
+import { cn } from "@/lib/utils";
+
+interface IconProps extends React.SVGProps<SVGSVGElement> {}
+
+// Helper function to get the redirect URL
+function getRedirectUrl() {
+	let url =
+		process?.env?.NEXT_PUBLIC_SITE_URL ?? // Set this in your .env!
+		process?.env?.NEXT_PUBLIC_VERCEL_URL ?? // Automatically set by Vercel.
+		"http://localhost:3000/";
+	// Make sure to include `https://` when not localhost.
+	url = url.includes("http") ? url : `https://${url}`;
+	// Make sure to include trailing `/`
+	url = url.charAt(url.length - 1) === "/" ? url : `${url}/`;
+	url = `${url}auth/callback`; // Append the callback path
+	return url;
+}
 
 export default function SignUp() {
-  const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+	const router = useRouter();
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [isOAuthSubmitting, setIsOAuthSubmitting] = useState<Provider | null>(
+		null,
+	);
+	const { theme } = useTheme();
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    setIsSubmitting(true); // Disable the button while the request is being handled
-    await handleRequest(e, signUp, router);
-    setIsSubmitting(false);
-  };
+	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+		setIsSubmitting(true);
+		await handleRequest(e, signUp, router);
+		setIsSubmitting(false);
+	};
 
-  return (
-    <div className="flex min-h-[100dvh] flex-col bg-background px-4 py-12 sm:px-6 lg:px-8">
-      <div className="flex items-center justify-between mb-8">
-        <Link
-          href="/signin"
-          className="rounded-md p-2 transition-colors hover:bg-muted"
-          prefetch={false}
-        >
-          <ArrowLeftIcon className="h-5 w-5" />
-          <span className="sr-only">Back</span>
-        </Link>
-        <div />
-      </div>
-      <div className="flex items-center justify-center flex-1">
-        <Card className="w-full max-w-md">
-          <CardContent className="grid gap-4 px-4 pb-4 my-10">
-            <div className="space-y-1 text-center">
-              <h2 className="text-2xl font-bold">Sign Up</h2>
-              <p className="text-muted-foreground my-2">
-                Enter your details below to create an account
-              </p>
-            </div>
-            <form
-              noValidate={true}
-              className="grid gap-4"
-              onSubmit={(e) => handleSubmit(e)}
-            >
-              <div className="grid gap-2">
-                <Label htmlFor="name">Name</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  name="name"
-                  placeholder="John Doe"
-                  required
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  name="email"
-                  placeholder="name@example.com"
-                  autoCapitalize="none"
-                  autoComplete="email"
-                  autoCorrect="off"
-                  required
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="password">Password</Label>
-                <Input id="password" type="password" name="password" required />
-              </div>
-              <Button type="submit" className="w-full" loading={isSubmitting}>
-                Sign up
-              </Button>
-            </form>
-            <div className="text-center text-sm text-muted-foreground">
-              <span>Sign up with email and password</span>
-            </div>
-            <div className="flex justify-center">
-              <Link
-                href="/signin"
-                className="text-sm font-medium hover:underline underline-offset-4"
-                prefetch={false}
-              >
-                Already have an account? Sign in
-              </Link>
-            </div>
-            <Separator className="my-6" />
-            <div className="grid gap-2">
-              <Button variant="outline" className="w-full">
-                <GithubIcon className="mr-2 h-4 w-4" />
-                Sign up with GitHub
-              </Button>
-              <Button variant="outline" className="w-full" disabled={true}>
-                <ChromeIcon className="mr-2 h-4 w-4" />
-                Sign up with Google
-              </Button>
-            </div>
-            <p className="text-muted-foreground text-xs text-center my-2">
-              For testing purposes, only Github is available.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  );
+	const handleOAuthSignIn = async (provider: Provider) => {
+		setIsOAuthSubmitting(provider);
+		try {
+			await signInWithOAuth({
+				provider: provider,
+				options: {
+					redirectTo: getRedirectUrl(),
+				},
+			});
+		} catch (error) {
+			console.error(`Error signing in with ${provider}:`, error);
+			setIsOAuthSubmitting(null);
+		}
+	};
+
+	return (
+		<div className="relative flex min-h-[100dvh] flex-col justify-center items-center bg-background px-4 py-12 sm:px-6 lg:px-8">
+			<Particles
+				className="absolute inset-0 -z-10"
+				quantity={100}
+				ease={80}
+				color={theme === "dark" ? "#ffffff" : "#000000"}
+				refresh
+			/>
+			<div className="w-full max-w-md z-10">
+				<Card className="w-full border-none shadow-xl dark:bg-zinc-900/80 bg-white/80 backdrop-blur-lg">
+					<CardContent className="grid gap-6 px-6 pb-6 pt-8">
+						<div className="space-y-2 text-center">
+							<h1 className="text-3xl font-bold tracking-tight">
+								Create Account
+							</h1>
+							<p className="text-muted-foreground">
+								Enter your details or use Google to sign up.
+							</p>
+						</div>
+						<form
+							noValidate={true}
+							className="grid gap-4"
+							onSubmit={(e) => handleSubmit(e)}
+						>
+							<div className="grid gap-2">
+								<Label htmlFor="name">Name</Label>
+								<Input
+									id="name"
+									type="text"
+									name="name"
+									placeholder="Your Name"
+									required
+									className="bg-background/50 dark:bg-zinc-800/50"
+								/>
+							</div>
+							<div className="grid gap-2">
+								<Label htmlFor="email">Email</Label>
+								<Input
+									id="email"
+									type="email"
+									name="email"
+									placeholder="name@example.com"
+									autoCapitalize="none"
+									autoComplete="email"
+									autoCorrect="off"
+									required
+									className="bg-background/50 dark:bg-zinc-800/50"
+								/>
+							</div>
+							<div className="grid gap-2">
+								<Label htmlFor="password">Password</Label>
+								<Input
+									id="password"
+									type="password"
+									name="password"
+									required
+									className="bg-background/50 dark:bg-zinc-800/50"
+								/>
+							</div>
+							<Button
+								type="submit"
+								className={cn(
+									buttonVariants({ size: "lg" }),
+									"w-full mt-2 rounded-full",
+								)}
+								disabled={isSubmitting}
+							>
+								{isSubmitting
+									? "Creating Account..."
+									: "Create Account with Email"}
+							</Button>
+						</form>
+						<Separator className="my-2" />
+						<div className="grid gap-3">
+							<Button
+								variant="outline"
+								className={cn(
+									buttonVariants({ size: "lg", variant: "outline" }),
+									"w-full rounded-full border-2 dark:border-white border-primary",
+								)}
+								onClick={() => handleOAuthSignIn("google")}
+								disabled={!!isOAuthSubmitting}
+							>
+								{isOAuthSubmitting === "google" ? (
+									<>
+										<LoadingSpinner className="mr-2 h-4 w-4 animate-spin" />
+										Redirecting...
+									</>
+								) : (
+									<>
+										<ChromeIcon className="mr-2 h-4 w-4" />
+										Sign up with Google
+									</>
+								)}
+							</Button>
+						</div>
+						<div className="mt-4 text-center text-sm">
+							Already have an account?{" "}
+							<Link
+								href="/signin"
+								className="font-semibold text-primary underline underline-offset-4 hover:text-primary/90"
+								prefetch={false}
+							>
+								Sign in
+							</Link>
+						</div>
+					</CardContent>
+				</Card>
+			</div>
+		</div>
+	);
 }
 
-function ArrowLeftIcon(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="m12 19-7-7 7-7" />
-      <path d="M19 12H5" />
-    </svg>
-  );
+function LoadingSpinner(props: IconProps) {
+	return (
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			width="24"
+			height="24"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth="2"
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			{...props}
+		>
+			<title>Loading</title>
+			<path d="M21 12a9 9 0 1 1-6.219-8.56" />
+		</svg>
+	);
 }
 
-function ChromeIcon(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="12" cy="12" r="10" />
-      <circle cx="12" cy="12" r="4" />
-      <line x1="21.17" x2="12" y1="8" y2="8" />
-      <line x1="3.95" x2="8.54" y1="6.06" y2="14" />
-      <line x1="10.88" x2="15.46" y1="21.94" y2="14" />
-    </svg>
-  );
-}
-
-function GithubIcon(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
-      <path d="M9 18c-4.51 2-5-2-7-2" />
-    </svg>
-  );
+function ChromeIcon(props: IconProps) {
+	return (
+		<svg
+			{...props}
+			xmlns="http://www.w3.org/2000/svg"
+			width="24"
+			height="24"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth="2"
+			strokeLinecap="round"
+			strokeLinejoin="round"
+		>
+			<title>Google Logo</title>
+			<path d="M12 22c5.52 0 10-4.48 10-10S17.52 2 12 2 2 6.48 2 12s4.48 10 10 10z" />
+			<path d="M12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5c.98 0 1.86.4 2.5 1.05l-1.16 1.16c-.34-.31-.82-.51-1.34-.51-1.1 0-2 .9-2 2s.9 2 2 2c1.3 0 1.76-.8 1.88-1.24h-1.88v-1.66h3.47c.05.18.08.38.08.58 0 2.1-1.41 3.59-3.55 3.59z" />
+		</svg>
+	);
 }

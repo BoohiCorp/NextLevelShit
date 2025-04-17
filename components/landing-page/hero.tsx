@@ -6,7 +6,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Star } from "lucide-react";
 import Particles from "@/components/magicui/particles";
 import Ripple from "@/components/magicui/ripple";
-import AnimatedGradientText from "@/components/magicui/animated-shiny-text";
+import { AnimatedShinyText } from "@/components/magicui/animated-shiny-text";
 import { ArrowRightIcon, GitHubLogoIcon } from "@radix-ui/react-icons";
 import AvatarCircles from "@/components/magicui/avatar-circles";
 import { useTheme } from "next-themes";
@@ -76,68 +76,47 @@ export default function HeroSection() {
 				<Ripple />
 			</div>
 			<div className="container mx-auto px-4 py-12 md:py-16 lg:py-32">
-				<div className="relative z-10 flex max-w-[64rem] flex-col items-center gap-4 text-center mx-auto">
-					<Link href={siteConfig.links.twitter} className="w-fit">
-						<div
-							className={cn(
-								"group rounded-full border border-black/5 bg-neutral-100 text-base text-secondary transition-all ease-in hover:cursor-pointer hover:bg-neutral-200 dark:border-white/5 dark:bg-neutral-900 dark:hover:bg-neutral-800",
-							)}
-						>
-							<AnimatedGradientText className="inline-flex items-center justify-center px-4 py-2 transition ease-out hover:text-neutral-600 hover:duration-300 hover:dark:text-neutral-400">
-								🎉 <hr className="mx-2 h-4 w-[1px] shrink-0 bg-gray-300" />{" "}
-								<span
-									className={cn(
-										"inline animate-gradient bg-gradient-to-r from-[#b76a24] via-[#6a24b7] to-[#b76a24] bg-[length:var(--bg-size)_100%] bg-clip-text text-transparent",
-									)}
-								>
-									Follow the progress on X
-								</span>
-								<ArrowRightIcon className="ml-2 size-4 transition-transform duration-300 ease-in-out group-hover:translate-x-0.5" />
-							</AnimatedGradientText>
-						</div>
-					</Link>
-
-					<h1 className="font-heading tracking-tight   font-bold text-2xl sm:text-4xl md:text-5xl lg:text-6xl">
-						Find Your Next Event with AI-Powered Recommendations
+				<div className="relative z-10 flex max-w-[64rem] flex-col items-center gap-6 text-center mx-auto">
+					<h1 className="font-heading tracking-tight font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl">
+						Stop Missing Out. <br /> AI Finds Your Perfect Events.
 					</h1>
-					<div className="max-w-[42rem] font-bold tracking-tight text-primary sm:text-xl sm:leading-8 rounded-full p-2">
-						Discover and subscribe to the best local events from top platforms
-						like Eventbrite, Luma, and Meetup with personalized AI
-						recommendations.
-					</div>
+					<p className="max-w-[42rem] font-medium text-primary/80 sm:text-xl sm:leading-8 rounded-full p-2">
+						Tired of endless scrolling? Get personalized event recommendations
+						from Eventbrite, Luma, Meetup, and more, delivered right to you.
+					</p>
 					<div className="flex flex-wrap justify-center gap-4">
 						<Link
 							href="/signup"
 							className={cn(
-								buttonVariants({ size: "xl" }),
-								"rounded-full border-2 border-primary dark:border-white text-bold text-white",
+								buttonVariants({ size: "lg" }),
+								"rounded-full border-2 border-primary dark:border-white font-bold text-white",
 							)}
 						>
-							Get Started
+							Start Your Free Trial
 						</Link>
 						<Link
 							href="#pricing"
 							className={cn(
-								buttonVariants({ variant: "outline", size: "xl" }),
-								"rounded-full border-2 border-primary dark:border-white text-semibold",
+								buttonVariants({ variant: "outline", size: "lg" }),
+								"rounded-full border-2 border-primary dark:border-white font-semibold",
 							)}
 						>
-							Pricing
+							See Plans & Pricing
 						</Link>
 					</div>
-					<div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-2 w-full">
-						<AvatarCircles numPeople={155} avatarUrls={avatarUrls} />
-						<div className="flex flex-col mt-2">
-							<div className="flex flex-row justify-center sm:justify-start">
+					<div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-4 w-full">
+						<AvatarCircles numPeople={160} avatarUrls={avatarUrls} />
+						<div className="flex flex-col items-center sm:items-start mt-2 sm:mt-0">
+							<div className="flex flex-row justify-center">
 								{[1, 2, 3, 4, 5].map((value) => (
 									<Star
 										key={value}
-										className="fill-yellow-200 text-yellow-300 size-5"
+										className="fill-yellow-300 text-yellow-400 size-5"
 									/>
 								))}
 							</div>
-							<span className="text-xs font-semibold">
-								Join 160+ developers
+							<span className="text-sm font-semibold text-primary/80">
+								Loved by 160+ event-goers!
 							</span>
 						</div>
 					</div>

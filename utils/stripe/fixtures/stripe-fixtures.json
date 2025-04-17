@@ -26,7 +26,8 @@
 				"unit_amount": 800,
 				"recurring": {
 					"interval": "month",
-					"interval_count": 1
+					"interval_count": 1,
+					"trial_period_days": 7
 				}
 			}
 		}

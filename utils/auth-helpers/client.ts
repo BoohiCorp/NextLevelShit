@@ -26,24 +26,34 @@ export async function handleRequest(
   }
 }
 
-export async function signInWithOAuth(e: React.FormEvent<HTMLFormElement>) {
-  console.log('Signing in with Oauth');
-  // Prevent default form submission refresh
-  e.preventDefault();
-  const formData = new FormData(e.currentTarget);
-  const provider = String(formData.get('provider')).trim() as Provider;
+export async function signInWithOAuth(params: {
+  provider: Provider;
+  options?: { redirectTo?: string; scopes?: string; queryParams?: { [key: string]: string } };
+}) {
+  const { provider, options } = params;
+  console.log(`Signing in with OAuth provider: ${provider}`);
 
-  console.log('signinwithoauth Form Data', formData);
-
-  console.log('this is the provider');
+  // Get the redirect URL
+  // Ensure getURL() constructs the full URL correctly for the callback
+  const defaultRedirectTo = getURL('/auth/callback');
+  const redirectTo = options?.redirectTo ?? defaultRedirectTo;
 
   // Create client-side supabase client and call signInWithOAuth
   const supabase = createClient();
-  const redirectURL = getURL('/auth/callback');
-  await supabase.auth.signInWithOAuth({
+  const { error } = await supabase.auth.signInWithOAuth({
     provider: provider,
     options: {
-      redirectTo: redirectURL
-    }
+      ...options, // Include any additional options passed
+      redirectTo: redirectTo,
+    },
   });
+
+  if (error) {
+    console.error('Error signing in with OAuth:', error);
+    // Optional: Handle error display to the user
+    // Maybe throw the error so the calling component can catch it
+    throw error;
+  }
+
+  // Redirect is handled by Supabase/browser based on the flow
 }

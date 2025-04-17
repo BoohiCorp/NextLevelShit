@@ -1,39 +1,33 @@
-import { createClient } from '@/utils/supabase/server';
 import { NextResponse } from 'next/server';
-import { NextRequest } from 'next/server';
-import { getErrorRedirect, getStatusRedirect } from '@/utils/helpers';
+import { createClient } from '@/utils/supabase/server';
 
-export async function GET(request: NextRequest) {
-  // The `/auth/callback` route is required for the server-side auth flow implemented
-  // by the `@supabase/ssr` package. It exchanges an auth code for the user's session.
-  const requestUrl = new URL(request.url);
-  const code = requestUrl.searchParams.get('code');
-  console.log('Auth/callback');
-  console.log('Code', code);
+export async function GET(request: Request) {
+  const { searchParams, origin } = new URL(request.url);
+  const code = searchParams.get('code');
+  // if "next" is in param, use it as the redirect URL
+  const next = searchParams.get('next') ?? '/';
 
   if (code) {
     const supabase = createClient();
-
     const { error } = await supabase.auth.exchangeCodeForSession(code);
-    console.log('error', error);
+    if (!error) {
+      // Determine the final redirect URL
+      let redirectUrl = `${origin}${next}`;
 
-    if (error) {
-      return NextResponse.redirect(
-        getErrorRedirect(
-          `${requestUrl.origin}/signin`,
-          error.name,
-          "Sorry, we weren't able to log you in. Please try again."
-        )
-      );
+      // Use x-forwarded-host if available (common in production deployments)
+      const forwardedHost = request.headers.get('x-forwarded-host');
+      const isLocalEnv = process.env.NODE_ENV === 'development';
+
+      if (!isLocalEnv && forwardedHost) {
+        redirectUrl = `https://${forwardedHost}${next}`;
+      }
+
+      console.log(`Redirecting to: ${redirectUrl}`);
+      return NextResponse.redirect(redirectUrl);
     }
   }
 
-  // URL to redirect to after sign in process completes
-  return NextResponse.redirect(
-    getStatusRedirect(
-      `${requestUrl.origin}/dashboard/account`,
-      'Success!',
-      'You are now signed in.'
-    )
-  );
+  // return the user to an error page with instructions
+  console.error('Error exchanging code for session or code not found');
+  return NextResponse.redirect(`${origin}/auth/auth-code-error`); // Redirect to an error page
 }
