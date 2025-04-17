@@ -1,11 +1,10 @@
-import { SiteConfig } from 'types';
+import type { SiteConfig } from 'types';
 
 export const siteConfig: SiteConfig = {
-  name: 'Hikari',
-  description:
-    'A complete & open-source Next.js 14 Subscription Starter template using Supabase, Stripe, Tailwind CSS.',
-  url: 'https://hikari.antoineross.com',
-  ogImage: 'https://hikari.antoineross.com/og.jpg',
+  name: 'Evently',
+  description: 'Discover and subscribe to the best local events with personalized AI recommendations.',
+  url: 'https://evently.life',
+  ogImage: 'https://evently.life/og.jpg',
   links: {
     twitter: 'https://twitter.com/antoineross__',
     github: 'https://github.com/antoineross/hikari'

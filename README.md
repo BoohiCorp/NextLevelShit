@@ -2,6 +2,10 @@
 
 The all-in-one starter kit for building high-performance SaaS applications using Next.js, TailwindCSS, and Supabase.
 
+# Evently
+
+Event discovery and recommendation platform.
+
 > **Warning**: This app is a work in progress. I'm building this in public. Follow the progress on Twitter [@antoineross\_\_](https://twitter.com/antoineross__). Check out the features below.
 
 ## 🎉 Features

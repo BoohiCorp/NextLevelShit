@@ -143,3 +143,53 @@ create policy "Can only view own subs data." on subscriptions for select using (
  */
 drop publication if exists supabase_realtime;
 create publication supabase_realtime for table products, prices;
+
+-- Events Table
+CREATE TABLE events (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    eventbrite_id TEXT UNIQUE NOT NULL,
+    name TEXT NOT NULL,
+    description TEXT,
+    url TEXT,
+    start_time TIMESTAMPTZ NOT NULL,
+    end_time TIMESTAMPTZ NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    is_free BOOLEAN,
+    currency TEXT,
+    min_price NUMERIC,
+    max_price NUMERIC,
+    venue_id TEXT,
+    venue_name TEXT,
+    venue_address TEXT,
+    latitude NUMERIC,
+    longitude NUMERIC,
+    organizer_id TEXT,
+    organizer_name TEXT,
+    image_url TEXT,
+    category_id TEXT,
+    category_name TEXT,
+    status TEXT, -- e.g., 'live', 'canceled', 'draft'
+    raw_data JSONB -- Store the raw API response for future flexibility
+);
+
+-- Optional: Index for faster lookups by location or time
+CREATE INDEX idx_events_start_time ON events(start_time);
+-- CREATE INDEX idx_events_location ON events USING gist (ll_to_earth(latitude, longitude)); -- Requires postgis extension
+
+-- Function to update updated_at timestamp
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- Trigger to update updated_at on events table modification
+CREATE TRIGGER update_events_updated_at
+    BEFORE UPDATE
+    ON
+        public.events
+    FOR EACH ROW
+    EXECUTE PROCEDURE update_updated_at_column();
